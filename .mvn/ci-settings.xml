@@ -4,7 +4,7 @@
           xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
     <servers>
         <server>
-            <id>confluence</id>
+            <id>akquinet-confluence</id>
             <username></username> <!-- with token access username can remain empty -->
             <password>${env.CONFLUENCE_TOKEN}</password> <!-- see CI-CD/Variables -->
         </server>
