@@ -1,0 +1,22 @@
+@startuml buildprocess
+
+title
+    Shows the build process
+end title
+
+autonumber "<B>[00]"
+actor Author as author
+boundary "Local machine" as local
+boundary Gitlab as gitlab
+control "Gitlab CI" as pipeline
+control Maven as mvn
+boundary Confluence as target
+
+author -> local : writes documentation
+author -> local : commits documentation
+author -> gitlab : pushes changes to git remote
+gitlab -> pipeline : starts CI/CD pipeline if necessary
+pipeline -> mvn : calls maven
+mvn -> target : asciidoc-confluence-publisher-maven-plugin publishes changes to confluence
+
+@enduml

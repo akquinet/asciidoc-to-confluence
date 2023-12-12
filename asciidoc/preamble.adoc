@@ -1,0 +1,11 @@
+:doctype: book
+:revnumber: 1.0
+:revdate: 31.04.2023
+:revremark: abcdef
+
+:lang: en
+
+:pdf-page-margin: 1in
+:media: print
+
+:sectlinks:

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>asciidoc-to-confluence</artifactId>
+    <groupId>de.akquinet.tas</groupId>
+    <version>1.0-SNAPSHOT</version>
+
+    <name>AsciiDoc to Confluence</name>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <asciidoc-confluence-publisher-maven-plugin.version>0.18.0</asciidoc-confluence-publisher-maven-plugin.version>
+
+        <!-- Confluence properties -->
+        <confluence.dir>./confluence</confluence.dir>
+        <confluence.url>${env.CONFLUENCE_BASE_URL}</confluence.url>
+        <confluence.space>${env.CONFLUENCE_SPACE_ID}</confluence.space>
+        <confluence.ancestor-id>${env.CONFLUENCE_ANCESTOR_DOCUMENT_ID}</confluence.ancestor-id>
+
+        <maven.server-id.confluence>akquinet-confluence</maven.server-id.confluence>
+    </properties>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <!-- asciidoc-confluence-publisher-maven-plugin -->
+                <plugin>
+                    <groupId>org.sahli.asciidoc.confluence.publisher</groupId>
+                    <artifactId>asciidoc-confluence-publisher-maven-plugin</artifactId>
+                    <version>${asciidoc-confluence-publisher-maven-plugin.version}</version>
+                    <configuration>
+                        <sourceEncoding>UTF-8</sourceEncoding> <!-- default -->
+                        <skipSslVerification>false</skipSslVerification>
+                        <maxRequestsPerSecond>10</maxRequestsPerSecond>
+                        <publishingStrategy>APPEND_TO_ANCESTOR</publishingStrategy>
+                        <orphanRemovalStrategy>KEEP_ORPHANS</orphanRemovalStrategy> <!-- ATTENTION: See plugin documentation for details to determine what strategy which is right for your specific use case -->
+
+                        <asciidocRootFolder>${confluence.dir}</asciidocRootFolder>
+                        <rootConfluenceUrl>${confluence.url}</rootConfluenceUrl>
+                        <spaceKey>${confluence.space}</spaceKey>
+                        <ancestorId>${confluence.ancestor-id}</ancestorId>
+
+                        <serverId>${maven.server-id.confluence}</serverId>
+
+                        <versionMessage>Version ${project.version}</versionMessage>
+                        <notifyWatchers>false</notifyWatchers>
+                        <attributes>
+                            <version>${project.version}</version>
+                        </attributes>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
+        <plugins>
+            <!-- asciidoc-confluence-publisher-maven-plugin -->
+            <plugin>
+                <groupId>org.sahli.asciidoc.confluence.publisher</groupId>
+                <artifactId>asciidoc-confluence-publisher-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>publish-to-confluence: ${maven.server-id.confluence}</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>publish</goal>
+                        </goals>
+                        <configuration>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

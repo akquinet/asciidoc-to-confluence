@@ -1,0 +1,13 @@
+include::preamble.adoc[]
+
+= ASCIIDoc to Confluence
+Martin Schröder <martin.schroeder@akquinet.de>
+:homepage: https://www.akquinet.de
+
+include::speaker.adoc[]
+
+include::datetime.adoc[]
+
+include::content.adoc[]
+
+include::documentation.adoc[]

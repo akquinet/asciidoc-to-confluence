@@ -1,0 +1,65 @@
+== Content
+
+=== Task
+
+. create (technical) documentation in an appropriate format which should support export to `PDF`, `HTML`, `Confluence`
+. the documentation should support diagrams, e.g. `PlantUML` or `Mermaid`
+. the documentation export should be reproducible
+
+=== Decision
+. We use https://asciidoc.org[AsciiDoc] as a technology to write the documentation in.
+. We use `git` as version control system.
+. In order to support reproducibility we establish a build process that utilizes plugins to support the targeted formats.
+.. We use `maven` as a build tool to execute that build process.
+.. The following plugins help us to achieve our goals:
+... https://docs.asciidoctor.org/maven-tools/latest/[asciidoctor-maven-plugin] to export to `PDF` and `HTML`
+... https://confluence-publisher.atlassian.net/wiki/spaces/CPD/overview[asciidoc-confluence-publisher-maven-plugin] to export to as many confluence instances as needed.
+. In order to support diagrams as code we chose `PlantUML` over `Mermaid` as it seems to be more mature at the moment and also is supported by the `confluence-publisher-plugin`.
+
+=== PlantUML
+There are at least these two ways to use `PlantUML` in the documenation:
+
+==== Include
+
+[source,asciidoc]
+----
+.ASCIIDoc per Include
+[plantuml,build,svg,align="center"]
+....
+\include::../uml/build.puml[]
+....
+----
+
+.ASCIIDoc via include
+[plantuml,build,svg,align="center"]
+....
+include::../uml/build.puml[]
+....
+
+==== Inline
+
+[cols="a,a", frame=none, grid=none]
+|===
+|[source,asciidoc]
+----
+.ASCIIDoc inline
+[plantuml,puml,svg,align="center"]
+....
+@startuml
+title inline
+Speaker --> audience : says "It can also be done inline"
+Audience --> Martin : answers "Yippie"
+@enduml
+....
+----
+
+|.ASCIIDoc inline
+[plantuml,puml,svg,align="left"]
+....
+@startuml
+title inline
+Speaker --> Audience : says "It can also be done inline"
+Audience --> Speaker : answers "Yippie"
+@enduml
+....
+|===

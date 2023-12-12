@@ -1,0 +1,7 @@
+:doctype: book
+
+:keywords: asciidoc, confluence, plantuml
+
+Please do not edit these pages as they are generated. Any manual changes might be overridden soon.
+
+include::../asciidoc/index.adoc[]

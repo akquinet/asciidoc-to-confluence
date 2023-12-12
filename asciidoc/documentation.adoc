@@ -1,0 +1,4 @@
+== Documentation
+
+- https://confluence-publisher.atlassian.net/wiki/spaces/CPD/overview[Maven-Plugin]
+- https://gitlab.spree.de/design-fest/asciidoc-to-confluence[Sourcecode in Gitlab]
