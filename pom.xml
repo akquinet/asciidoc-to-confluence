@@ -13,18 +13,50 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <asciidoc-confluence-publisher-maven-plugin.version>0.18.0</asciidoc-confluence-publisher-maven-plugin.version>
+        <asciidoc-confluence-publisher-maven-plugin.version>0.21.0</asciidoc-confluence-publisher-maven-plugin.version>
+
+        <!-- asciidoctor properties -->
+        <docroot.dir>${project.basedir}/asciidoc</docroot.dir>
+        <asciidoctor-maven-plugin.version>2.2.4</asciidoctor-maven-plugin.version>
+        <asciidoctor.diagram.version>2.2.11</asciidoctor.diagram.version>
+        <asciidoctor.multipage.version>0.0.18</asciidoctor.multipage.version>
+        <asciidoctor.pdf.version>2.3.9</asciidoctor.pdf.version>
+
+        <jruby.version>9.4.3.0</jruby.version>
 
         <!-- Confluence properties -->
-        <confluence.dir>./confluence</confluence.dir>
-        <confluence.url>${env.CONFLUENCE_BASE_URL}</confluence.url>
-        <confluence.space>${env.CONFLUENCE_SPACE_ID}</confluence.space>
         <confluence.ancestor-id>${env.CONFLUENCE_ANCESTOR_DOCUMENT_ID}</confluence.ancestor-id>
+        <confluence.dir>./confluence</confluence.dir>
+        <confluence.space>${env.CONFLUENCE_SPACE_ID}</confluence.space>
+        <confluence.url>${env.CONFLUENCE_BASE_URL}</confluence.url>
 
         <maven.server-id.confluence>akquinet-confluence</maven.server-id.confluence>
     </properties>
 
+    <dependencies>
+        <dependency>
+            <groupId>rubygems</groupId>
+            <artifactId>asciidoctor-multipage</artifactId>
+            <type>gem</type>
+            <version>${asciidoctor.multipage.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>rubygems</groupId>
+            <artifactId>asciidoctor-diagram</artifactId>
+            <type>gem</type>
+            <version>${asciidoctor.diagram.version}</version>
+        </dependency>
+    </dependencies>
+
     <build>
+        <extensions>
+            <extension> <!-- this allows us to download gems -->
+                <groupId>org.torquebox.mojo</groupId>
+                <artifactId>mavengem-wagon</artifactId>
+                <version>1.0.3</version>
+            </extension>
+        </extensions>
         <pluginManagement>
             <plugins>
                 <!-- asciidoc-confluence-publisher-maven-plugin -->
@@ -53,27 +85,196 @@
                         </attributes>
                     </configuration>
                 </plugin>
+
+                <!-- asciidoctor-maven-plugin -->
+                <plugin>
+                    <groupId>org.asciidoctor</groupId>
+                    <artifactId>asciidoctor-maven-plugin</artifactId>
+                    <version>${asciidoctor-maven-plugin.version}</version>
+                    <configuration>
+                        <requires>
+                            <require>asciidoctor-diagram</require>
+                            <require>asciidoctor-multipage</require>
+                        </requires>
+                        <gemPath>${project.build.directory}/gems</gemPath>
+                    </configuration>
+                </plugin>
+
+                <!-- gem-maven-plugin -->
+                <plugin>
+                    <groupId>de.saumya.mojo</groupId>
+                    <artifactId>gem-maven-plugin</artifactId>
+                    <version>2.0.1</version>
+                    <configuration>
+                        <jrubyVersion>${jruby.version}</jrubyVersion>
+                        <gemHome>${project.build.directory}/gems</gemHome>
+                        <gemPath>${project.build.directory}/gems</gemPath>
+                    </configuration>
+                </plugin>
             </plugins>
         </pluginManagement>
 
         <plugins>
-            <!-- asciidoc-confluence-publisher-maven-plugin -->
+            <!-- gem-maven-plugin -->
             <plugin>
-                <groupId>org.sahli.asciidoc.confluence.publisher</groupId>
-                <artifactId>asciidoc-confluence-publisher-maven-plugin</artifactId>
+                <groupId>de.saumya.mojo</groupId>
+                <artifactId>gem-maven-plugin</artifactId>
                 <executions>
+                    <!-- Install required gems in target directory -->
                     <execution>
-                        <id>publish-to-confluence: ${maven.server-id.confluence}</id>
-                        <phase>generate-resources</phase>
+                        <id>install gems</id>
+                        <phase>initialize</phase>
                         <goals>
-                            <goal>publish</goal>
+                            <goal>initialize</goal>
                         </goals>
-                        <configuration>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
         </plugins>
     </build>
 
+    <profiles>
+        <!-- Confluence -->
+        <profile>
+            <id>confluence</id>
+            <build>
+                <plugins>
+                    <!-- asciidoc-confluence-publisher-maven-plugin -->
+                    <plugin>
+                        <groupId>org.sahli.asciidoc.confluence.publisher</groupId>
+                        <artifactId>asciidoc-confluence-publisher-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>publish-to-confluence: ${maven.server-id.confluence}</id>
+                                <phase>generate-resources</phase>
+                                <goals>
+                                    <goal>publish</goal>
+                                </goals>
+                                <configuration>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- PDF -->
+        <profile>
+            <id>pdf</id>
+            <build>
+                <plugins>
+                    <!-- asciidoctor-maven-plugin -->
+                    <plugin>
+                        <groupId>org.asciidoctor</groupId>
+                        <artifactId>asciidoctor-maven-plugin</artifactId>
+                        <configuration>
+                            <backend>pdf</backend>
+                            <doctype>book</doctype>
+                            <sourceDirectory>${docroot.dir}</sourceDirectory>
+                            <sourceDocumentName>index.adoc</sourceDocumentName>
+                        </configuration>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.asciidoctor</groupId>
+                                <artifactId>asciidoctorj-diagram</artifactId>
+                                <version>${asciidoctor.diagram.version}</version>
+                            </dependency>
+                            <dependency>
+                                <groupId>org.asciidoctor</groupId>
+                                <artifactId>asciidoctorj-pdf</artifactId>
+                                <version>${asciidoctor.pdf.version}</version>
+                            </dependency>
+                        </dependencies>
+                        <executions>
+                            <execution>
+                                <id>create-pdf</id>
+                                <phase>generate-resources</phase>
+                                <goals>
+                                    <goal>process-asciidoc</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${project.build.directory}/pdf</outputDirectory>
+                                    <attributes>
+                                        <source-highlighter>rouge</source-highlighter>
+                                        <icons>font</icons>
+                                        <pagenums/>
+                                        <toc/>
+                                    </attributes>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- HTML -->
+        <profile>
+            <id>html</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.asciidoctor</groupId>
+                        <artifactId>asciidoctor-maven-plugin</artifactId>
+                        <executions>
+                            <!-- creates a singlepage html document with a scrolling TOC on the top -->
+                            <execution>
+                                <id>create-html-singlepage</id>
+                                <phase>generate-resources</phase>
+                                <goals>
+                                    <goal>process-asciidoc</goal>
+                                </goals>
+                                <configuration>
+                                    <backend>html5</backend>
+                                    <doctype>book</doctype>
+                                    <sourceDirectory>${docroot.dir}</sourceDirectory>
+                                    <sourceDocumentName>index.adoc</sourceDocumentName>
+                                    <outputDirectory>${project.build.directory}/html/singlepage</outputDirectory>
+                                    <attributes>
+                                        <toc/>
+                                        <linkcss>false</linkcss>
+                                        <lang>de</lang>
+                                        <source-highlighter>coderay</source-highlighter>
+                                        <sectancors>true</sectancors>
+                                    </attributes>
+                                </configuration>
+                            </execution>
+
+                            <!-- creates a multipage html document with a non-scrolling TOC on the left hand side -->
+                            <execution>
+                                <id>create-html-multipage</id>
+                                <phase>generate-resources</phase>
+                                <goals>
+                                    <goal>process-asciidoc</goal>
+                                </goals>
+                                <configuration>
+                                    <backend>multipage_html5</backend>
+                                    <doctype>book</doctype>
+                                    <sourceDirectory>${docroot.dir}</sourceDirectory>
+                                    <sourceDocumentName>index.adoc</sourceDocumentName>
+                                    <outputDirectory>${project.build.directory}/html/multipage</outputDirectory>
+                                    <attributes>
+                                        <toc>left</toc>
+                                        <linkcss>false</linkcss>
+                                        <lang>de</lang>
+                                        <source-highlighter>coderay</source-highlighter>
+                                        <sectancors>true</sectancors>
+                                    </attributes>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+    <repositories>
+        <!-- repository to get ruby gems from -->
+        <repository>
+            <id>mavengems</id>
+            <url>mavengem:https://rubygems.org</url>
+        </repository>
+    </repositories>
 </project>

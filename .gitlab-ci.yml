@@ -1,7 +1,7 @@
 publishToConfluence:
   image: maven:3-jdk-11
   script:
-    - mvn --settings=.mvn/ci-ci-settings.xml generate-resources
+    - mvn --settings=.mvn/ci-settings.xml generate-resources -Pconfluence
   rules:
     - changes:
       - asciidoc/**/*
